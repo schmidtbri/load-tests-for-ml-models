@@ -1,6 +1,6 @@
 # Load Tests for ML Models
 
-This code is used in this [blog post]().
+This code is used in this [blog post](https://www.tekhnoal.com/load-tests-for-ml-models.html).
 
 ## Requirements
 

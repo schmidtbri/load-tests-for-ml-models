@@ -1,0 +1,5 @@
+service_title: Insurance Charges Model Service
+models:
+  - qualified_name: insurance_charges_model
+    class_path: insurance_charges_model.prediction.model.InsuranceChargesModel
+    create_endpoint: true

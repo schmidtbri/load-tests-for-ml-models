@@ -1,0 +1,70 @@
+# this ConfigMap will be loaded as a YAML file by the insurance-charges-model Pods
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: model-service-configuration
+data:
+  rest_config: |-
+    service_title: Insurance Charges Model Service
+    models:
+      - qualified_name: insurance_charges_model
+        class_path: insurance_charges_model.prediction.model.InsuranceChargesModel
+        create_endpoint: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insurance-charges-model-deployment
+  labels:
+    app: insurance-charges-model
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: insurance-charges-model
+  template:
+    metadata:
+      labels:
+        app: insurance-charges-model
+    spec:
+      containers:
+        - name: insurance-charges-model
+          image: insurance_charges_model_service:latest
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          imagePullPolicy: Never
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "250Mi"
+            limits:
+              cpu: "200m"
+              memory: "250Mi"
+          env:
+            - name: REST_CONFIG
+              value: ./configuration/rest_config.yaml
+          volumeMounts:
+            - name: config-volume
+              mountPath: /service/configuration
+      volumes:
+        - name: config-volume
+          configMap:
+            name: model-service-configuration
+            items:
+              - key: rest_config
+                path: rest_config.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: insurance-charges-model-service
+spec:
+  type: NodePort
+  selector:
+    app: insurance-charges-model
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8000
